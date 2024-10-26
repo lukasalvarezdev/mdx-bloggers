@@ -45,7 +45,7 @@ export default function Component() {
 						type="text"
 						placeholder="Search blog posts..."
 						className={cn(
-							'w-full px-4 py-2 rounded-lg border border-gray-200',
+							'w-full px-4 py-2 rounded-md border border-gray-200',
 							'focus:outline-none focus:ring focus:ring-primary-500 focus:border-primary-500',
 						)}
 					/>
