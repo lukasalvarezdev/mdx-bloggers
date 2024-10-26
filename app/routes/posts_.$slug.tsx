@@ -46,18 +46,16 @@ export default function BlogPost() {
 	const Component = React.useMemo(() => getMDXComponent(code), [code]);
 
 	return (
-		<div key={slug} className="text-lg py-6">
+		<div key={slug} className="py-12">
 			<div className="max-w-2xl mx-auto">
 				<Link
-					to="/"
-					className="flex gap-2 mb-8 text-base text-black dark:text-white items-center group max-w-max"
+					to="/posts"
+					className="flex gap-2 mb-8 text-base text-black items-center group max-w-max"
 				>
-					<ArrowBack />
-					Back to blog
+					<ArrowBack className="group-hover:-translate-x-1 transition-all" />
+					Back to posts
 				</Link>
-				<h1 className="mb-2 text-black dark:text-white text-4xl font-medium">
-					{metadata.title}
-				</h1>
+				<h1 className="mb-2 text-black">{metadata.title}</h1>
 				<p className="text-sm mb-8">{metadata.date}</p>
 			</div>
 

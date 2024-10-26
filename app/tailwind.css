@@ -2,6 +2,173 @@
 @tailwind components;
 @tailwind utilities;
 
-code {
-	@apply font-mono text-sm bg-gray-100 p-1 rounded;
+@layer base {
+	:root {
+		--bg-primary: #fff;
+		--text-primary: #374151;
+	}
+
+	html,
+	body {
+		@apply text-[color:var(--text-primary)] bg-[color:var(--bg-primary)] text-lg;
+
+		@media (prefers-color-scheme: dark) {
+			color-scheme: dark;
+		}
+
+		font-family: 'DM Sans', sans-serif;
+	}
+
+	.text-primary {
+		@apply text-[color:var(--text-primary)];
+	}
+
+	.bg-primary {
+		@apply bg-[color:var(--bg-primary)];
+	}
+
+	.border-primary {
+		@apply border-[color:var(--text-primary)];
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-medium;
+	}
+
+	h1.text-primary,
+	h2.text-primary,
+	h3.text-primary,
+	h4.text-primary,
+	h5.text-primary,
+	h6.text-primary {
+		@apply text-black;
+	}
+
+	h1 {
+		@apply text-4xl;
+	}
+
+	h2 {
+		@apply text-3xl;
+	}
+
+	h3 {
+		@apply text-2xl;
+	}
+
+	h4 {
+		@apply text-xl;
+	}
+
+	h5 {
+		@apply text-lg;
+	}
+
+	h6 {
+		@apply text-base;
+	}
+
+	.mdx h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply text-black mb-4;
+	}
+
+	.mdx p {
+		@apply leading-[1.75] mb-8;
+	}
+
+	.mdx img {
+		@apply mx-auto my-8 rounded-lg;
+	}
+
+	.mdx ol {
+		@apply list-decimal pl-8;
+	}
+
+	.mdx strong {
+		@apply font-medium;
+	}
+
+	pre {
+		@apply leading-loose mb-8 overflow-x-auto bg-[#f3f3f3] rounded-lg;
+		tab-size: 2;
+	}
+
+	code {
+		@apply p-4 text-[14px];
+	}
+
+	code[data-line-numbers] {
+		counter-reset: line;
+	}
+
+	code[data-line-numbers] > [data-line]::before {
+		counter-increment: line;
+		content: counter(line);
+
+		/* Other styling */
+		display: inline-block;
+		width: 0.75rem;
+		margin-right: 1rem;
+		text-align: right;
+		color: gray;
+	}
+
+	code[data-line-numbers-max-digits='2'] > [data-line]::before {
+		width: 1.25rem;
+	}
+
+	code[data-line-numbers-max-digits='3'] > [data-line]::before {
+		width: 1.75rem;
+	}
+
+	code[data-line-numbers-max-digits='4'] > [data-line]::before {
+		width: 2.25rem;
+	}
+
+	code span[data-line] {
+		@apply pr-4;
+	}
+
+	code[data-theme*=' '],
+	code[data-theme*=' '] span {
+		color: var(--shiki-light);
+		background-color: #f3f3f3;
+	}
+
+	.underlined {
+		position: relative;
+		white-space: nowrap;
+	}
+
+	.underlined:after {
+		bottom: -4px;
+		content: '';
+		display: block;
+		height: 2px;
+		left: 0;
+		position: absolute;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.25s ease;
+		width: 100%;
+	}
+
+	.underlined:hover:after {
+		background-color: currentColor;
+		transform: scaleX(1);
+	}
+
+	input {
+		background-color: #fff;
+	}
 }
