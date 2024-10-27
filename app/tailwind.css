@@ -5,7 +5,7 @@
 @layer base {
 	:root {
 		--bg-primary: #fff;
-		--text-primary: #374151;
+		--text-primary: black;
 	}
 
 	html,
@@ -80,6 +80,10 @@
 	h5,
 	h6 {
 		@apply text-black mb-4;
+	}
+
+	.cont {
+		@apply mx-auto px-4 max-w-4xl;
 	}
 
 	.mdx p {

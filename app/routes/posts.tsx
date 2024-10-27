@@ -33,7 +33,7 @@ export default function Component() {
 	const { posts } = useLoaderData<typeof loader>();
 
 	return (
-		<div className="container mx-auto px-4 py-8 max-w-3xl">
+		<div className="cont mx-auto px-4 py-8 max-w-3xl">
 			<header className="mb-8">
 				<h1 className="text-3xl font-bold text-center mb-2">My CMS Blog</h1>
 				<p className="text-center text-muted-foreground mb-4">
