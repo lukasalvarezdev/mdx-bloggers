@@ -15,6 +15,13 @@ export async function getUserPrefs(request: Request): Promise<z.infer<typeof coo
 	try {
 		return cookieSchema.parse(cookie);
 	} catch (e) {
-		throw redirect('/get-started?error=invalid-cookie');
+		throw redirect('/app/get-started?error=invalid-cookie');
 	}
+}
+
+export function destroyUserPrefs() {
+	return createCookie('user-prefs', {
+		secrets: [process.env.SESSION_SECRET!],
+		maxAge: 0,
+	});
 }

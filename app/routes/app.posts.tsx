@@ -114,7 +114,7 @@ export function ErrorBoundary() {
 
 					<p className="mt-8">
 						Keeps happening?{' '}
-						<Link to="/app/logout" className="underline">
+						<Link to="/auth/logout" className="underline">
 							Log out
 						</Link>
 					</p>
