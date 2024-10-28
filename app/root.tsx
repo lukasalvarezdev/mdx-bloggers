@@ -1,7 +1,16 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import {
+	Links,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useRouteLoaderData,
+} from '@remix-run/react';
 import type { LinksFunction, LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
 import './tailwind.css';
 import { getDomainUrl } from './utils/misc';
+import { getUser } from './utils/github.api';
+import { getSession } from './utils/session.server';
 
 export const links: LinksFunction = () => [
 	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -17,7 +26,13 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
+	const session = await getSession(request);
+	const accessToken = session.get('accessToken');
+
+	const user = await getUser({ accessToken });
+
 	return {
+		user,
 		requestInfo: { origin: getDomainUrl(request), path: new URL(request.url).pathname },
 	};
 }
@@ -43,4 +58,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
 	return <Outlet />;
+}
+
+export function useRootLoaderData() {
+	const data = useRouteLoaderData<RootLoaderType>('root');
+	if (!data) throw new Error('No root loader data');
+	return data;
+}
+
+export function useOptionalUser() {
+	const { user } = useRootLoaderData();
+	return user;
 }

@@ -13,8 +13,9 @@ export async function getUserPrefs(request: Request): Promise<z.infer<typeof coo
 	const cookie = (await userPrefs.parse(cookieHeader)) || {};
 
 	try {
+		console.log(cookie);
 		return cookieSchema.parse(cookie);
-	} catch {
+	} catch (e) {
 		return { repo: '', dir: '' };
 	}
 }

@@ -25,12 +25,13 @@ export async function fetchApi<S extends SchemaType = undefined>(
 	const init = await getFetchInit();
 
 	try {
-		const url = path.startsWith('http') ? path : soenacApiUrl + path;
+		const url = path.startsWith('http') ? path : apiUrl + path;
 
 		const response = await fetch(url, init);
 
 		if (!response.ok) {
 			const error = await response.text();
+			console.error({ error, url, init });
 			return { success: false, error };
 		}
 
@@ -70,4 +71,4 @@ export async function fetchApi<S extends SchemaType = undefined>(
 	}
 }
 
-export const soenacApiUrl = 'https://api.github.com/repos';
+export const apiUrl = 'https://api.github.com';

@@ -12,9 +12,19 @@ export async function getPosts({
 	dir: string;
 	accessToken: string;
 }) {
-	return await fetchApi(`/${owner}/${repo}/contents/${dir}`, {
+	return await fetchApi(`/repos/${owner}/${repo}/contents/${dir}`, {
 		method: 'GET',
 		token: accessToken,
 		schema: z.array(z.object({ name: z.string() })),
 	});
+}
+
+export async function getUser({ accessToken }: { accessToken: string }) {
+	const response = await fetchApi('/user', {
+		method: 'GET',
+		token: accessToken,
+		schema: z.object({ name: z.string() }),
+	});
+	if (!response.success) return null;
+	return response.data;
 }
