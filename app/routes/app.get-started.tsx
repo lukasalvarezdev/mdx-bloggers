@@ -1,9 +1,12 @@
 import { ActionFunctionArgs, redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
+import { protectRoute } from '~/utils/session.server';
 import { Button, Card } from '~/utils/ui';
 import { userPrefs } from '~/utils/user-prefs.server';
 
 export async function action({ request }: ActionFunctionArgs) {
+	await protectRoute(request);
+
 	const cookieHeader = request.headers.get('Cookie');
 	const cookie = (await userPrefs.parse(cookieHeader)) || {};
 	const formData = new URLSearchParams(await request.text());

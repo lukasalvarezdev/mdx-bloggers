@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { getMDXComponent } from 'mdx-bundler/client';
-import { getPostBySlug } from '~/utils/blog.server';
 import { blogPageMeta } from '~/utils/blog.meta';
 import { cn } from '~/utils/misc';
-import { fetchApi } from '~/utils/fetch-api.server';
-import { getSession } from '~/utils/session.server';
-import { z } from 'zod';
+import { protectRoute } from '~/utils/session.server';
+import { getUserPrefs } from '~/utils/user-prefs.server';
+import { githubApi } from '~/utils/github.api';
+import { getPostBySlug } from '~/utils/blog.server';
 
 export const meta = blogPageMeta;
 
@@ -15,23 +15,22 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const { slug } = params;
 	if (!slug) throw new Error('No slug provided');
 
-	const owner = 'lukasalvarezdev'; // Replace with dynamic owner if necessary
-	const repo = 'lukasalvarez.com'; // Replace with dynamic repo if necessary
-	const path = 'app/content'; // Specify the file path you want to read
-	const session = await getSession(request);
-	const accessToken = session.get('accessToken');
+	const accessToken = await protectRoute(request);
+	const user = await githubApi.getUser({ accessToken });
 
-	if (!accessToken) throw redirect('/auth/github');
+	if (!user) throw new Error('Failed to fetch user');
 
-	const response = await fetchApi(`/${owner}/${repo}/contents/${path}/${slug}`, {
-		method: 'GET',
-		token: accessToken,
-		schema: z.object({
-			download_url: z.string(),
-		}),
+	const { repo, dir } = await getUserPrefs(request);
+
+	const response = await githubApi.getPostBySlug({
+		owner: user.username,
+		accessToken,
+		slug,
+		repo,
+		dir,
 	});
 
-	if (!response.success) throw new Error('Failed to fetch posts');
+	if (!response.success) throw new Error('Failed to fetch post');
 
 	const fileResponse = await fetch(response.data.download_url);
 

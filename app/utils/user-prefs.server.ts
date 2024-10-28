@@ -1,4 +1,4 @@
-import { createCookie } from '@remix-run/node';
+import { createCookie, redirect } from '@remix-run/node';
 import { z } from 'zod';
 
 export const userPrefs = createCookie('user-prefs', {
@@ -13,9 +13,8 @@ export async function getUserPrefs(request: Request): Promise<z.infer<typeof coo
 	const cookie = (await userPrefs.parse(cookieHeader)) || {};
 
 	try {
-		console.log(cookie);
 		return cookieSchema.parse(cookie);
 	} catch (e) {
-		return { repo: '', dir: '' };
+		throw redirect('/get-started?error=invalid-cookie');
 	}
 }

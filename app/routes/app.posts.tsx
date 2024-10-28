@@ -1,8 +1,8 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { Link, redirect, useLoaderData } from '@remix-run/react';
-import { getPosts } from '~/utils/github.api';
+import { Link, useLoaderData } from '@remix-run/react';
+import { githubApi } from '~/utils/github.api';
 import { cn } from '~/utils/misc';
-import { getSession } from '~/utils/session.server';
+import { protectRoute } from '~/utils/session.server';
 import { getUserPrefs } from '~/utils/user-prefs.server';
 
 export const meta: MetaFunction = () => {
@@ -10,15 +10,14 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const owner = 'lukasalvarezdev'; // Replace with dynamic owner if necessary
-	const session = await getSession(request);
-	const accessToken = session.get('accessToken');
+	const accessToken = await protectRoute(request);
+	const user = await githubApi.getUser({ accessToken });
+
+	if (!user) throw new Error('Failed to fetch user');
 
 	const { repo, dir } = await getUserPrefs(request);
 
-	if (!accessToken) throw redirect('/auth/github');
-
-	const response = await getPosts({ accessToken, owner, repo, dir });
+	const response = await githubApi.getPosts({ accessToken, owner: user.username, repo, dir });
 
 	if (!response.success) throw new Error('Failed to fetch posts');
 
