@@ -55,7 +55,7 @@ export default function Component() {
 						key={post.name}
 					>
 						<h2 className="text-xl font-semibold mb-2">
-							<Link to={`/posts/${post.name}`} className="hover:underline">
+							<Link to={`/app/posts/${post.name}`} className="hover:underline">
 								{post.name}
 							</Link>
 						</h2>
@@ -67,7 +67,7 @@ export default function Component() {
 							<span>Published on: 2023-05-15</span>
 						</div>
 						<div className="flex justify-end">
-							<Link to={`/posts/${post.name}`} className="underline font-medium">
+							<Link to={`/app/posts/${post.name}`} className="underline font-medium">
 								Read More
 							</Link>
 						</div>

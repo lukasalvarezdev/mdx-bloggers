@@ -12,7 +12,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	cookie.repo = repo;
 	cookie.dir = dir;
 
-	return redirect('/posts', {
+	return redirect('/app/posts', {
 		headers: {
 			'Set-Cookie': await userPrefs.serialize(cookie),
 		},

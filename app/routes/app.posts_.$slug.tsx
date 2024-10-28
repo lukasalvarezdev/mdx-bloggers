@@ -49,7 +49,7 @@ export default function BlogPost() {
 		<div key={slug} className="py-12">
 			<div className="max-w-2xl mx-auto">
 				<Link
-					to="/posts"
+					to="/app/posts"
 					className="flex gap-2 mb-8 text-base text-black items-center group max-w-max"
 				>
 					<ArrowBack className="group-hover:-translate-x-1 transition-all" />
