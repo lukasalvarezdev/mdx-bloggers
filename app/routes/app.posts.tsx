@@ -19,7 +19,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const { repo, dir } = await getUserPrefs(request);
 
 	const response = await githubApi.getPosts({ accessToken, owner: user.username, repo, dir });
-
 	if (!response.success) {
 		if (response.error.includes('Not Found') && response.error.includes('404')) {
 			throw new Response('Post not found', { status: 404 });
@@ -112,6 +111,13 @@ export function ErrorBoundary() {
 					<LinkButton to="/app/posts" className="block mt-8">
 						Go back
 					</LinkButton>
+
+					<p className="mt-8">
+						Keeps happening?{' '}
+						<Link to="/app/logout" className="underline">
+							Log out
+						</Link>
+					</p>
 				</div>
 			</div>
 		);
