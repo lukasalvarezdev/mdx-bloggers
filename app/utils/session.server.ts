@@ -21,47 +21,15 @@ async function getAccessToken(request: Request): Promise<string | undefined> {
 	return session.get('accessToken');
 }
 
-export async function isTokenExpired(request: Request) {
-	const token = await getAccessToken(request);
-	if (!token) return true;
-
-	try {
-		const decoded = decodeJWT(token);
-		const exp = typeof decoded.payload.exp === 'number' ? decoded.payload.exp : 0;
-
-		return Date.now() >= exp * 1000;
-	} catch (error) {
-		return true;
-	}
-}
-
-function decodeJWT(token: string) {
-	const parts = token.split('.');
-	if (parts.length !== 3) {
-		throw new Error('Invalid JWT format');
-	}
-
-	try {
-		const decodedHeader = JSON.parse(atob(parts[0]!));
-		const decodedPayload = JSON.parse(atob(parts[1]!));
-
-		return {
-			header: decodedHeader,
-			payload: decodedPayload,
-			signature: parts[2], // The signature part as-is
-		};
-	} catch (error) {
-		return { header: {}, payload: {}, signature: '' };
-	}
-}
-
 export async function protectRoute(request: Request) {
-	const isExpired = await isTokenExpired(request);
+	const token = await getAccessToken(request);
 
-	if (isExpired) {
+	if (!token) {
 		const session = await getSession(request);
 		throw redirect('/login', {
 			headers: { 'Set-Cookie': await blogSession.destroySession(session) },
 		});
 	}
+
+	return token;
 }

@@ -1,4 +1,11 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import {
+	Links,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useRouteLoaderData,
+} from '@remix-run/react';
 import type { LinksFunction, LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
 import './tailwind.css';
 import { getDomainUrl } from './utils/misc';
@@ -43,4 +50,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
 	return <Outlet />;
+}
+
+export function useRootLoaderData() {
+	const data = useRouteLoaderData<RootLoaderType>('root');
+	if (!data) throw new Error('No root loader data');
+	return data;
 }

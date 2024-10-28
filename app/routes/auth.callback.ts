@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const session = await getSession(request);
 	session.set('accessToken', accessToken);
 
-	return redirect('/', {
+	return redirect('/app/get-started', {
 		headers: { 'Set-Cookie': await blogSession.commitSession(session) },
 	});
 }
