@@ -6,7 +6,7 @@ export async function loader() {
 	const params = new URLSearchParams({
 		redirect_uri: process.env.GITHUB_CALLBACK_URL!,
 		client_id: clientId!,
-		scope: 'repo',
+		scope: 'public_repo',
 		state,
 	});
 
