@@ -1,8 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
+import { isRouteErrorResponse, Link, useLoaderData, useRouteError } from '@remix-run/react';
 import { githubApi } from '~/utils/github.api';
 import { cn } from '~/utils/misc';
 import { protectRoute } from '~/utils/session.server';
+import { LinkButton } from '~/utils/ui';
 import { getUserPrefs } from '~/utils/user-prefs.server';
 
 export const meta: MetaFunction = () => {
@@ -19,7 +20,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	const response = await githubApi.getPosts({ accessToken, owner: user.username, repo, dir });
 
-	if (!response.success) throw new Error('Failed to fetch posts');
+	if (!response.success) {
+		if (response.error.includes('Not Found') && response.error.includes('404')) {
+			throw new Response('Post not found', { status: 404 });
+		}
+
+		throw new Error(response.error);
+	}
 
 	return { posts: response.data };
 }
@@ -75,4 +82,40 @@ export default function Component() {
 			</div>
 		</div>
 	);
+}
+
+export function ErrorBoundary() {
+	const error = useRouteError();
+
+	if (isRouteErrorResponse(error)) {
+		return (
+			<div className="flex pt-20 justify-center w-full">
+				<div className="text-center">
+					<h1>
+						{error.status} {error.statusText}
+					</h1>
+					<p>{error.data}</p>
+
+					<LinkButton to="/app/posts" className="block mt-8">
+						Go back
+					</LinkButton>
+				</div>
+			</div>
+		);
+	} else if (error instanceof Error) {
+		return (
+			<div className="flex pt-20 justify-center w-full">
+				<div className="text-center">
+					<h1>Unknown Error</h1>
+					<p>{error.message}</p>
+
+					<LinkButton to="/app/posts" className="block mt-8">
+						Go back
+					</LinkButton>
+				</div>
+			</div>
+		);
+	} else {
+		return <h1>Unknown Error</h1>;
+	}
 }
