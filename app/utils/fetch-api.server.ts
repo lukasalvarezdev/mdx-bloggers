@@ -15,7 +15,7 @@ export type ApiResponse<S extends SchemaType> =
 			data: S extends z.ZodSchema ? z.infer<S> : unknown;
 			// eslint-disable-next-line no-mixed-spaces-and-tabs
 	  }
-	| { success: false };
+	| { success: false; error: string };
 
 export async function fetchApi<S extends SchemaType = undefined>(
 	path: string,
@@ -29,7 +29,10 @@ export async function fetchApi<S extends SchemaType = undefined>(
 
 		const response = await fetch(url, init);
 
-		if (!response.ok) return { success: false };
+		if (!response.ok) {
+			const error = await response.text();
+			return { success: false, error };
+		}
 
 		let data = await response.json();
 
@@ -37,7 +40,8 @@ export async function fetchApi<S extends SchemaType = undefined>(
 			const result = schema.safeParse(data);
 
 			if (!result.success) {
-				return { success: false };
+				console.error(JSON.stringify(result.error, null, 2));
+				return { success: false, error: 'Failed to parse response' };
 			}
 
 			data = result.data;
@@ -45,7 +49,7 @@ export async function fetchApi<S extends SchemaType = undefined>(
 
 		return { success: true, data };
 	} catch (error) {
-		return { success: false };
+		return { success: false, error: 'Unkwnon error' };
 	}
 
 	async function getFetchInit(): Promise<RequestInit> {

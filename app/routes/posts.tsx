@@ -1,9 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { Link, redirect, useLoaderData } from '@remix-run/react';
-import { z } from 'zod';
-import { fetchApi } from '~/utils/fetch-api.server';
+import { getPosts } from '~/utils/github.api';
 import { cn } from '~/utils/misc';
 import { getSession } from '~/utils/session.server';
+import { getUserPrefs } from '~/utils/user-prefs.server';
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Remix Blog Stack by Lukas Alvarez' }];
@@ -11,18 +11,14 @@ export const meta: MetaFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const owner = 'lukasalvarezdev'; // Replace with dynamic owner if necessary
-	const repo = 'lukasalvarez.com'; // Replace with dynamic repo if necessary
-	const path = 'app/content'; // Specify the file path you want to read
 	const session = await getSession(request);
 	const accessToken = session.get('accessToken');
 
+	const { repo, dir } = await getUserPrefs(request);
+
 	if (!accessToken) throw redirect('/auth/github');
 
-	const response = await fetchApi(`/${owner}/${repo}/contents/${path}`, {
-		method: 'GET',
-		token: accessToken,
-		schema: z.array(z.object({ name: z.string() })),
-	});
+	const response = await getPosts({ accessToken, owner, repo, dir });
 
 	if (!response.success) throw new Error('Failed to fetch posts');
 

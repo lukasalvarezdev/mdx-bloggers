@@ -34,8 +34,11 @@ export function LinkButton({ variant = 'primary', ...props }: LinkButtonProps) {
 export function Card(props: React.ComponentProps<'div'>) {
 	return (
 		<div
-			className={cn('bg-white p-6 rounded-lg shadow-sm border border-gray-200')}
 			{...props}
+			className={cn(
+				'bg-white p-6 rounded-lg shadow-sm border border-gray-200',
+				props.className,
+			)}
 		/>
 	);
 }
