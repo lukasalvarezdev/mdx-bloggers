@@ -1,6 +1,63 @@
 import { Link } from '@remix-run/react';
 import { cn } from './misc';
 
+type LabelProps = React.ComponentProps<'label'> & {
+	htmlFor: string;
+};
+export function Label(props: LabelProps) {
+	return (
+		<label
+			{...props}
+			htmlFor={props.htmlFor}
+			className={cn('block text-sm font-medium text-gray-700', props.className)}
+		/>
+	);
+}
+
+type InputProps = React.ComponentProps<'input'> & {
+	label: string;
+};
+
+export function Input({ label, ...props }: InputProps) {
+	return (
+		<div className="space-y-1">
+			<Label htmlFor={props.id as string}>{label}</Label>
+			<input
+				{...props}
+				className={cn(
+					'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm',
+					props.className,
+				)}
+			/>
+		</div>
+	);
+}
+
+type SelectProps = React.ComponentProps<'select'> & {
+	label: string;
+	options: { value: string; label: string }[];
+};
+export function Select({ label, options, ...props }: SelectProps) {
+	return (
+		<div className="space-y-1">
+			<Label htmlFor={props.id as string}>{label}</Label>
+			<select
+				{...props}
+				className={cn(
+					'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm',
+					props.className,
+				)}
+			>
+				{options.map(option => (
+					<option key={option.value} value={option.value}>
+						{option.label}
+					</option>
+				))}
+			</select>
+		</div>
+	);
+}
+
 type ButtonProps = React.ComponentProps<'button'> & {
 	variant?: 'primary' | 'outline';
 };
@@ -11,7 +68,7 @@ export function Button({ variant = 'primary', ...props }: ButtonProps) {
 			className={cn(
 				'px-6 py-2 rounded-md text-base',
 				{
-					'text-white bg-black': variant === 'primary',
+					'text-white bg-black hover:bg-black/80': variant === 'primary',
 					'text-black border border-black': variant === 'outline',
 				},
 				props.className,
