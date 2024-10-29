@@ -52,8 +52,17 @@ async function getUser({ accessToken }: { accessToken: string }) {
 	return response.data;
 }
 
+async function getRepos(token: string) {
+	return await fetchApi('/user/repos', {
+		method: 'GET',
+		token,
+		schema: z.array(z.object({ name: z.string() })),
+	});
+}
+
 export const githubApi = {
 	getPosts,
 	getPostBySlug,
 	getUser,
+	getRepos,
 };
