@@ -35,8 +35,6 @@ export async function action({ request }: ActionFunctionArgs) {
 	cookie.repo = repo;
 	cookie.dir = dir;
 
-	console.log(repo, dir);
-
 	const response = await githubApi.getPosts({
 		accessToken: accessToken,
 		owner: user?.username as string,

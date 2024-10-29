@@ -1,13 +1,36 @@
 import * as React from 'react';
-import { LoaderFunctionArgs } from '@remix-run/node';
-import { isRouteErrorResponse, Link, useLoaderData, useRouteError } from '@remix-run/react';
+import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import {
+	Form,
+	isRouteErrorResponse,
+	Link,
+	useLoaderData,
+	useRouteError,
+} from '@remix-run/react';
 import { getMDXComponent } from 'mdx-bundler/client';
 import { blogPageMeta } from '~/utils/blog.meta';
 import { protectRoute } from '~/utils/session.server';
 import { getUserPrefs } from '~/utils/user-prefs.server';
 import { githubApi } from '~/utils/github.api';
 import { getPostBySlug } from '~/utils/blog.server';
-import { ArrowBack, LinkButton } from '~/utils/ui';
+import { ArrowBack, Button, LinkButton } from '~/utils/ui';
+import {
+	diffSourcePlugin,
+	headingsPlugin,
+	MDXEditor,
+	thematicBreakPlugin,
+	listsPlugin,
+	linkPlugin,
+} from '@mdxeditor/editor';
+import { cn } from '~/utils/misc';
+
+const plugins = [
+	diffSourcePlugin({ viewMode: 'source' }),
+	headingsPlugin(),
+	thematicBreakPlugin(),
+	listsPlugin(),
+	linkPlugin(),
+];
 
 export const meta = blogPageMeta;
 
@@ -40,13 +63,47 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	const fileResponse = await fetch(response.data.download_url);
 
-	const post = await getPostBySlug(await fileResponse.text());
+	const text = await fileResponse.text();
+	const post = await getPostBySlug(text);
 
-	return { ...post, slug };
+	return { ...post, slug, text, sha: response.data.sha };
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+	const accessToken = await protectRoute(request);
+
+	const user = await githubApi.getUser({ accessToken });
+
+	const { dir, repo } = await getUserPrefs(request);
+	const formData = new URLSearchParams(await request.text());
+	const content = formData.get('content');
+	const sha = formData.get('sha');
+
+	if (!content || !sha) {
+		return json({ error: 'All fields are required' }, 400);
+	}
+
+	const response = await githubApi.updateFile({
+		accessToken: accessToken,
+		owner: user?.username as string,
+		repo,
+		dir,
+		content,
+		slug: params.slug as string,
+		sha,
+	});
+
+	if (!response.success) {
+		return json({ error: 'Failed to fetch posts' }, 500);
+	}
+
+	return redirect('/app/posts');
 }
 
 export default function BlogPost() {
-	const { code, slug, metadata } = useLoaderData<typeof loader>();
+	const { code, slug, metadata, text, sha } = useLoaderData<typeof loader>();
+	const [mode, setMode] = React.useState<'source' | 'preview'>('preview');
+	const [content, setContent] = React.useState<string>(text);
 
 	const Component = React.useMemo(() => getMDXComponent(code), [code]);
 
@@ -64,18 +121,67 @@ export default function BlogPost() {
 				<p className="text-sm mb-8">{metadata.date}</p>
 			</div>
 
-			<div className="max-w-4xl mx-auto">
-				<img
-					src={metadata.bannerUrl}
-					alt={metadata.bannerCredit}
-					className="w-full object-cover rounded-lg mb-8"
-					loading="lazy"
-				/>
+			<div className="sticky z-10 top-0 mb-4 bg-white py-4">
+				<div className="max-w-2xl mx-auto flex justify-between items-center">
+					<div
+						className={cn(
+							'bg-gray-100 rounded-md max-w-max h-9 border border-gray-200 flex items-center text-sm',
+							'overflow-hidden',
+						)}
+					>
+						<button
+							className={cn('font-medium px-2 h-9', {
+								'bg-gray-700 text-white': mode === 'source',
+							})}
+							onClick={() => setMode('source')}
+						>
+							View Source
+						</button>
+						<button
+							className={cn('font-medium px-2 h-9', {
+								'bg-gray-700 text-white': mode === 'preview',
+							})}
+							onClick={() => setMode('preview')}
+						>
+							View Preview
+						</button>
+					</div>
+
+					<div>
+						<Form method="POST">
+							<input type="hidden" name="content" value={content} />
+							<input type="hidden" name="sha" value={sha} />
+							<Button className="text-sm">Save Changes</Button>
+						</Form>
+					</div>
+				</div>
 			</div>
 
-			<div className="mdx max-w-2xl mx-auto">
-				<Component />
-			</div>
+			{mode === 'source' ? (
+				<div className="max-w-2xl mx-auto relative">
+					<MDXEditor
+						className="border border-gray-200 rounded-lg overflow-hidden"
+						markdown={text}
+						plugins={plugins}
+						onChange={value => setContent(value)}
+					/>
+				</div>
+			) : (
+				<>
+					<div className="max-w-4xl mx-auto">
+						<img
+							src={metadata.bannerUrl}
+							alt={metadata.bannerCredit}
+							className="w-full object-cover rounded-lg mb-8"
+							loading="lazy"
+						/>
+					</div>
+
+					<div className="mdx max-w-2xl mx-auto">
+						<Component />
+					</div>
+				</>
+			)}
 		</div>
 	);
 }
