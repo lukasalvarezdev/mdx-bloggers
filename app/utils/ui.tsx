@@ -66,7 +66,7 @@ export function Button({ variant = 'primary', ...props }: ButtonProps) {
 		<button
 			{...props}
 			className={cn(
-				'px-6 py-2 rounded-md text-base',
+				'px-6 h-9 rounded-md text-base flex items-center justify-center',
 				{
 					'text-white bg-black hover:bg-black/80': variant === 'primary',
 					'text-black border border-black': variant === 'outline',
