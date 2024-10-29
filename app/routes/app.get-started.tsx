@@ -1,8 +1,9 @@
 import { ActionFunctionArgs, redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
 import { protectRoute } from '~/utils/session.server';
-import { Button, Card } from '~/utils/ui';
+import { Button, Card, Input, Select } from '~/utils/ui';
 import { userPrefs } from '~/utils/user-prefs.server';
+import { useUser } from './app';
 
 export async function action({ request }: ActionFunctionArgs) {
 	await protectRoute(request);
@@ -23,27 +24,25 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Component() {
+	const { name } = useUser();
+
 	return (
 		<div className="h-screen w-full flex justify-center py-20">
-			<Card className="mx-auto max-w-sm max-h-max">
-				<h3>Welcome, Lukas Alvarez</h3>
+			<Card className="mx-auto max-w-sm max-h-max w-full">
+				<h4>Welcome, {name}</h4>
+				<p className="text-sm text-gray-600 mb-4">
+					Pick a repository and a directory where your content is stored. We&apos;ll
+					automatically fetch your posts from there.
+				</p>
 
-				<Form method="POST">
-					<div>
-						<label htmlFor="s" className="block">
-							select a repository
-						</label>
-						<select name="repo" id="">
-							<option value="lukasalvarez.com">repo 1</option>
-						</select>
-					</div>
+				<Form method="POST" className="flex flex-col gap-4">
+					<Select
+						name="repo"
+						label="Select a repository"
+						options={[{ value: 'lukasalvarez.com', label: 'lukasalvarez.com' }]}
+					/>
 
-					<div>
-						<label htmlFor="s" className="block">
-							select a directory
-						</label>
-						<input type="text" name="dir" id="" />
-					</div>
+					<Input type="text" name="dir" label="Path to content directory" />
 
 					<Button>Submit</Button>
 				</Form>

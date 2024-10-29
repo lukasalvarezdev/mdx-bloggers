@@ -25,7 +25,7 @@ export function Input({ label, ...props }: InputProps) {
 			<input
 				{...props}
 				className={cn(
-					'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm',
+					'block w-full px-3 h-9 border border-gray-300 rounded-md shadow-sm sm:text-sm',
 					props.className,
 				)}
 			/>
@@ -44,7 +44,7 @@ export function Select({ label, options, ...props }: SelectProps) {
 			<select
 				{...props}
 				className={cn(
-					'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm',
+					'block w-full px-3 h-9 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm',
 					props.className,
 				)}
 			>

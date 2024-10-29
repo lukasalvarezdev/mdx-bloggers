@@ -74,11 +74,11 @@
 	}
 
 	.mdx h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
+	.mdx h2,
+	.mdx h3,
+	.mdx h4,
+	.mdx h5,
+	.mdx h6 {
 		@apply text-black mb-4;
 	}
 
