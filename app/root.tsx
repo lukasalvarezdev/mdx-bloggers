@@ -7,8 +7,9 @@ import {
 	useRouteLoaderData,
 } from '@remix-run/react';
 import type { LinksFunction, LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
-import './tailwind.css';
 import { getDomainUrl } from './utils/misc';
+import './tailwind.css';
+import '@mdxeditor/editor/style.css';
 
 export const links: LinksFunction = () => [
 	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },

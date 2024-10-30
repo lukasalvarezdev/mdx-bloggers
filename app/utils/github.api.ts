@@ -35,7 +35,7 @@ async function getPostBySlug({
 	return await fetchApi(`/repos/${owner}/${repo}/contents/${dir}/${slug}`, {
 		method: 'GET',
 		token: accessToken,
-		schema: z.object({ download_url: z.string() }),
+		schema: z.object({ download_url: z.string(), sha: z.string() }),
 	});
 }
 
@@ -60,9 +60,41 @@ async function getRepos(token: string) {
 	});
 }
 
+async function updateFile({
+	accessToken,
+	owner,
+	repo,
+	dir,
+	slug,
+	content,
+	sha,
+}: {
+	owner: string;
+	repo: string;
+	dir: string;
+	slug: string;
+	content: string;
+	accessToken: string;
+	sha: string;
+}) {
+	const response = await fetchApi(`/repos/${owner}/${repo}/contents/${dir}/${slug}`, {
+		method: 'PUT',
+		token: accessToken,
+		body: {
+			message: 'Update post using MDX Bloggers app',
+			content: Buffer.from(content).toString('base64'),
+			sha,
+		},
+		schema: z.object({ content: z.object({ sha: z.string() }) }),
+	});
+
+	return response;
+}
+
 export const githubApi = {
 	getPosts,
 	getPostBySlug,
 	getUser,
 	getRepos,
+	updateFile,
 };
