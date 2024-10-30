@@ -20,6 +20,8 @@ import {
 	MDXEditor,
 	listsPlugin,
 	linkPlugin,
+	codeBlockPlugin,
+	codeMirrorPlugin,
 } from '@mdxeditor/editor';
 import { cn } from '~/utils/misc';
 import { z } from 'zod';
@@ -29,6 +31,8 @@ const plugins = [
 	headingsPlugin(),
 	listsPlugin(),
 	linkPlugin(),
+	codeBlockPlugin(),
+	codeMirrorPlugin(),
 ];
 
 export const meta = blogPageMeta;
