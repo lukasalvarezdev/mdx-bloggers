@@ -81,7 +81,7 @@ async function updateFile({
 		method: 'PUT',
 		token: accessToken,
 		body: {
-			message: 'Update post',
+			message: 'Update post using MDX Bloggers app',
 			content: Buffer.from(content).toString('base64'),
 			sha,
 		},

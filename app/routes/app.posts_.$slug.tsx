@@ -13,21 +13,20 @@ import { protectRoute } from '~/utils/session.server';
 import { getUserPrefs } from '~/utils/user-prefs.server';
 import { githubApi } from '~/utils/github.api';
 import { getPostBySlug } from '~/utils/blog.server';
-import { ArrowBack, Button, LinkButton } from '~/utils/ui';
+import { ArrowBack, Button, Input, LinkButton } from '~/utils/ui';
 import {
 	diffSourcePlugin,
 	headingsPlugin,
 	MDXEditor,
-	thematicBreakPlugin,
 	listsPlugin,
 	linkPlugin,
 } from '@mdxeditor/editor';
 import { cn } from '~/utils/misc';
+import { z } from 'zod';
 
 const plugins = [
 	diffSourcePlugin({ viewMode: 'source' }),
 	headingsPlugin(),
-	thematicBreakPlugin(),
 	listsPlugin(),
 	linkPlugin(),
 ];
@@ -76,8 +75,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	const { dir, repo } = await getUserPrefs(request);
 	const formData = new URLSearchParams(await request.text());
-	const content = formData.get('content');
-	const sha = formData.get('sha');
+	const { content, sha, ...frontMatter } = schema.parse(Object.fromEntries(formData.entries()));
+	const newContent = updateFrontMatter(content, frontMatter);
 
 	if (!content || !sha) {
 		return json({ error: 'All fields are required' }, 400);
@@ -88,7 +87,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		owner: user?.username as string,
 		repo,
 		dir,
-		content,
+		content: newContent,
 		slug: params.slug as string,
 		sha,
 	});
@@ -103,7 +102,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function BlogPost() {
 	const { code, slug, metadata, text, sha } = useLoaderData<typeof loader>();
 	const [mode, setMode] = React.useState<'source' | 'preview'>('preview');
-	const [content, setContent] = React.useState<string>(text);
+	const [content, setContent] = React.useState<string>(processFrontMatter(text));
 
 	const Component = React.useMemo(() => getMDXComponent(code), [code]);
 
@@ -148,7 +147,7 @@ export default function BlogPost() {
 					</div>
 
 					<div>
-						<Form method="POST">
+						<Form method="POST" id="mdx-form">
 							<input type="hidden" name="content" value={content} />
 							<input type="hidden" name="sha" value={sha} />
 							<Button className="text-sm">Save Changes</Button>
@@ -159,11 +158,34 @@ export default function BlogPost() {
 
 			{mode === 'source' ? (
 				<div className="max-w-2xl mx-auto relative">
+					<div className="mb-4 flex flex-col gap-4">
+						<Input name="title" label="Title" defaultValue={metadata.title} form="mdx-form" />
+						<Input
+							name="description"
+							label="Description"
+							defaultValue={metadata.description}
+							form="mdx-form"
+						/>
+						<Input name="date" label="Date" defaultValue={metadata.date} form="mdx-form" />
+						<Input
+							name="bannerUrl"
+							label="Banner URL"
+							defaultValue={metadata.bannerUrl}
+							form="mdx-form"
+						/>
+						<Input
+							name="bannerCredit"
+							label="Banner Credit"
+							defaultValue={metadata.bannerCredit}
+							form="mdx-form"
+						/>
+					</div>
+
 					<MDXEditor
 						className="border border-gray-200 rounded-lg overflow-hidden"
-						markdown={text}
 						plugins={plugins}
-						onChange={value => setContent(value)}
+						markdown={content}
+						onChange={setContent}
 					/>
 				</div>
 			) : (
@@ -221,3 +243,43 @@ export function ErrorBoundary() {
 		return <h1>Unknown Error</h1>;
 	}
 }
+
+function updateFrontMatter(
+	content: string,
+	newFrontMatter: z.infer<typeof frontMatterSchema>,
+): string {
+	// Convert new front matter object to string format
+	const frontMatterString = `---\ntitle: ${newFrontMatter.title}\ndate: ${newFrontMatter.date}\ndescription: ${newFrontMatter.description}\nbannerUrl: ${newFrontMatter.bannerUrl}\nbannerCredit: ${newFrontMatter.bannerCredit}\n---`;
+
+	// Remove the existing front matter block
+	const remainingContent = content.replace(/^---\n[\s\S]*?\n---\n?/, '');
+
+	// Return new front matter appended to the content
+	return `${frontMatterString}\n${remainingContent}`;
+}
+
+function processFrontMatter(content: string): string {
+	// Match the front matter block
+	const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+	if (!frontMatterMatch) return content;
+
+	// Remove the front matter from the original content
+	return content.replace(/^---\n[\s\S]*?\n---\n?/, '');
+}
+
+const schema = z.object({
+	title: z.string(),
+	date: z.string(),
+	bannerUrl: z.string(),
+	bannerCredit: z.string(),
+	content: z.string(),
+	sha: z.string(),
+	description: z.string(),
+});
+const frontMatterSchema = schema.pick({
+	title: true,
+	date: true,
+	bannerUrl: true,
+	bannerCredit: true,
+	description: true,
+});
